@@ -3,4 +3,4 @@
 유튜브에서 [멈춤보단 천천히라도](https://www.youtube.com/channel/UCQeLdtodgFWThPxVeWjAncA) 님의 영상과 관련 [글](https://webnautes.tistory.com/) 그리고 [OpenCV Docs](https://docs.opencv.org/4.1.2/index.html) 에서 배우고 있습니다.
 
 1. Open CV C++ 접하기
-  * <https://github.com/danielkang1003/OpenCV-Tutorial/blob/master/main.cpp>
+  * [기본적인 작동법](https://github.com/danielkang1003/OpenCV-Tutorial/blob/master/main.cpp)
