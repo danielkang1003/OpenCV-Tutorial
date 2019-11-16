@@ -2,6 +2,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
+
 #include <iostream>
 
 using namespace cv;
@@ -127,6 +128,9 @@ int main(){
 		inRange(img_hsv, lower_blue3, upper_blue3, img_mask3);
 		img_mask = img_mask1 | img_mask2 | img_mask3;
 
+		//모폴리지 연산으로 오프닝과 클로징 추가
+		//오프닝을 통해 바이너리에서 작은 흰 영역으로 검출되는 노이즈 제거
+		//클로징을 통해 흰 영역 내부에 생기는 검은 구멍 메꾸기
 		int morph_size = 2;
 		Mat element = getStructuringElement(MORPH_RECT, Size(2 * morph_size + 1, 2 * morph_size + 1),
 			Point(morph_size, morph_size));
@@ -138,6 +142,30 @@ int main(){
 		//즉, 마스크 이미지로 원본 이미지에서 범위값에 해당되는 영상 부분을 획득
 		Mat img_result;
 		bitwise_and(img_color, img_color, img_result, img_mask);
+
+
+		//Labeling : ConnectedComponentsWithStates 함수로 바이너리 이미지 라벨링하기
+		Mat img_labels, stats, centroids;
+		int numOfLabels = connectedComponentsWithStats(img_mask, img_labels, stats, centroids, 8, CV_32S);
+		
+		//connectedcomponentswithstats 함수로 얻은 정보로 영역 크기, 외곽의 사각형을 그릴 수 있는 좌표,
+		//영역의 중심 좌표 얻기
+		for (int i = 1; i < numOfLabels; i++) {
+			int area = stats.at<int>(i, CC_STAT_AREA);
+			int left = stats.at<int>(i, CC_STAT_LEFT);
+			int top = stats.at<int>(i, CC_STAT_TOP);
+			int width = stats.at<int>(i, CC_STAT_WIDTH);
+			int height = stats.at<int>(i, CC_STAT_HEIGHT);
+
+			int centerX = centroids.at<double>(i, 0);
+			int centerY = centroids.at<double>(i, 1);
+		
+			//area 크기가 100이상인 경우에만 중심 좌표와 외곽 사각박스 그리기
+			if (area > 100) {
+				circle(img_color, Point(centerX, centerY), 5, Scalar(255, 0, 0), 1);
+				rectangle(img_color, Point(left, top), Point(left + width, top + height), Scalar(0, 0, 255), 1);
+			}
+		}
 
 		imshow("img_color", img_color);
 		imshow("img_mask", img_mask);
