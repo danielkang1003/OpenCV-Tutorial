@@ -6,8 +6,11 @@
 
 using namespace cv;
 using namespace std;
+//트랙바 생성시 요구하는 콜백 함수
 
+void dummy(int, void*) {
 
+}
 
 int threshold1 = 30;
 
@@ -88,6 +91,11 @@ int main(){
 	namedWindow("img_color");
 	setMouseCallback("img_color", mouse_callback);
 
+	//트랙바를 변수 threshold1에 연결하여 생성 최대값은 255까지
+	//트랙바 초기값은 30으로 지정
+	createTrackbar("threshold", "img_color", &threshold1, 255, dummy);
+	setTrackbarPos("threshold", "img_color", 30);
+
 
 	Mat img_hsv;
 
@@ -104,6 +112,10 @@ int main(){
 		//카메라 캡쳐 read함수로 이미지 가져오기
 		cap.read(img_color);
 
+		//트랙바 이동시 바뀐 값 가져오기
+		//마우스 클릭시 콜백함수에서 범위값 업데이트에 사용
+		threshold1 = getTrackbarPos("threshold", "img_color");
+
 		//이미지를 비주얼 색공간 -> hsv색공간으로 변환
 		cvtColor(img_color, img_hsv, COLOR_BGR2HSV);
 
@@ -115,9 +127,15 @@ int main(){
 		inRange(img_hsv, lower_blue3, upper_blue3, img_mask3);
 		img_mask = img_mask1 | img_mask2 | img_mask3;
 
+		int morph_size = 2;
+		Mat element = getStructuringElement(MORPH_RECT, Size(2 * morph_size + 1, 2 * morph_size + 1),
+			Point(morph_size, morph_size));
+		morphologyEx(img_mask, img_mask, MORPH_OPEN, element);
+		morphologyEx(img_mask, img_mask, MORPH_CLOSE, element);
 
 		//마스크 이미지와 원본이미지를 &연산하여 마스크 이미지에서 흰색 표현 부분만
 		//원본 이미지에서 남겨둠
+		//즉, 마스크 이미지로 원본 이미지에서 범위값에 해당되는 영상 부분을 획득
 		Mat img_result;
 		bitwise_and(img_color, img_color, img_result, img_mask);
 
@@ -125,6 +143,7 @@ int main(){
 		imshow("img_mask", img_mask);
 		imshow("img_result", img_result);
 
+		//esc 키 누르면 종료
 		if (waitKey(1) > 0)
 			break;
 	}
