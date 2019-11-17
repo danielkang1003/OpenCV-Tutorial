@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 
+#include<iostream>
 
 using namespace cv;
 
@@ -46,8 +47,11 @@ void mouse_callback(int event, int x, int y, int flags, void *userdata)
 		mouse_is_pressing = false;	//위에 마우스 눌렀을때 True 바꾸었던 것을 다시 false 로 바꿈
 
 		Mat img_cat(img_color, Rect(start_x, start_y, x - start_x, y - start_y));
+		
+		
 		cvtColor(img_cat, img_cat, COLOR_BGR2GRAY);	//ROI 영역을 Grayscale로 변환
 		cvtColor(img_cat, img_cat, COLOR_GRAY2BGR);
+		
 
 		//별도의 윈도우에 grayscale로 수정하여 보여줌
 		img_cat.copyTo(img_result(Rect(start_x, start_y, x - start_x, y - start_y)));
@@ -61,8 +65,8 @@ void mouse_callback(int event, int x, int y, int flags, void *userdata)
 int main(){
 	//이미지 불러와서 화면에 보여주기
 	img_color = imread("image/cat.jpg", IMREAD_COLOR);
-	imshow("img_color", img_color);
 
+	imshow("img_color", img_color);
 	//마우스 이벤트 발생시켜 호출될 콜백 함수 지정
 	setMouseCallback("img_color", mouse_callback);
 
